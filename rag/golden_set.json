@@ -1,0 +1,14 @@
+[
+  {"question": "Какой штраф если самокат оставили на проезжей части?", "doc": "regulations/pravila_parkovki.md"},
+  {"question": "Сколько дней есть чтобы оспорить штраф?", "doc": "regulations/pravila_parkovki.md"},
+  {"question": "При каком заряде нужно менять батарею?", "doc": "regulations/reglament_akb.md"},
+  {"question": "Можно ли оставить разряженные АКБ в машине на ночь зимой?", "doc": "regulations/reglament_akb.md"},
+  {"question": "Через сколько вернутся деньги на карту?", "doc": "regulations/vozvrat_sredstv.md"},
+  {"question": "Почему на карте заблокировали деньги при начале поездки?", "doc": "regulations/vozvrat_sredstv.md"},
+  {"question": "За какой долг блокируют аккаунт?", "doc": "regulations/blokirovka.md"},
+  {"question": "Кто решает разблокировать клиента после нарушения?", "doc": "regulations/blokirovka.md"},
+  {"question": "Что делать клиенту если он упал и травмировался?", "doc": "regulations/dtp.md"},
+  {"question": "Какие документы нужны для страховой выплаты?", "doc": "regulations/dtp.md"},
+  {"question": "Самокат не вышел на связь после смены аккумулятора", "doc": "regulations/reglament_akb.md"},
+  {"question": "списали дважды за одну поездку", "doc": "regulations/vozvrat_sredstv.md"}
+]

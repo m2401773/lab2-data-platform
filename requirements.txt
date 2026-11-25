@@ -1,0 +1,5 @@
+confluent-kafka==2.6.1
+trino==0.331.0
+psycopg[binary]==3.2.3
+redis==5.2.1
+boto3==1.35.80

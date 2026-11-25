@@ -1,0 +1,10 @@
+SERVICE          STATE     STATUS
+create-buckets   exited    Exited (0) 8 minutes ago
+debezium         running   Up 8 minutes (healthy)
+kafka            running   Up 8 minutes (healthy)
+kafka-ui         running   Up 8 minutes
+pg-meta          running   Up 8 minutes (healthy)
+pg-oltp          running   Up 8 minutes (healthy)
+redis            running   Up 8 minutes (healthy)
+seaweedfs        running   Up 8 minutes (healthy)
+trino            running   Up 8 minutes (healthy)

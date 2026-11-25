@@ -1,0 +1,21 @@
+{
+  "name": "vzhuh-oltp",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "plugin.name": "pgoutput",
+    "database.hostname": "pg-oltp",
+    "database.port": "5432",
+    "database.user": "app",
+    "database.password": "app",
+    "database.dbname": "vzhuh",
+    "topic.prefix": "oltp",
+    "table.include.list": "public.clients,public.scooters",
+    "slot.name": "vzhuh_slot",
+    "publication.name": "vzhuh_pub",
+    "publication.autocreate.mode": "filtered",
+    "snapshot.mode": "initial",
+    "decimal.handling.mode": "string",
+    "tombstones.on.delete": "true",
+    "heartbeat.interval.ms": "10000"
+  }
+}

@@ -1,0 +1,9 @@
+NAMES                      IMAGE                                  STATUS                   PORTS
+pr2-platform-trino-1       trinodb/trino:476                      Up 8 minutes (healthy)   0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp
+pr2-platform-debezium-1    quay.io/debezium/connect:2.7.3.Final   Up 8 minutes (healthy)   0.0.0.0:8083->8083/tcp, [::]:8083->8083/tcp
+pr2-platform-kafka-ui-1    provectuslabs/kafka-ui:v0.7.2          Up 8 minutes             0.0.0.0:8081->8080/tcp, [::]:8081->8080/tcp
+pr2-platform-pg-oltp-1     postgres:16-alpine                     Up 8 minutes (healthy)   0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp
+pr2-platform-redis-1       redis:7-alpine                         Up 8 minutes (healthy)   0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+pr2-platform-pg-meta-1     pgvector/pgvector:pg16                 Up 8 minutes (healthy)   0.0.0.0:5434->5432/tcp, [::]:5434->5432/tcp
+pr2-platform-kafka-1       apache/kafka:3.8.0                     Up 8 minutes (healthy)   0.0.0.0:9094->9094/tcp, [::]:9094->9094/tcp
+pr2-platform-seaweedfs-1   chrislusf/seaweedfs:3.80               Up 8 minutes (healthy)   0.0.0.0:8333->8333/tcp, [::]:8333->8333/tcp, 0.0.0.0:8888->8888/tcp, [::]:8888->8888/tcp

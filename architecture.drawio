@@ -1,0 +1,408 @@
+<mxfile host="Electron">
+  <diagram id="vzhuh-arch" name="Архитектура">
+    <mxGraphModel background="#ffffff" dx="799" dy="691" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2020" pageHeight="1380" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=18;fontColor=#000000;" value="&lt;b&gt;Платформа данных кикшеринга «Вжух»&lt;/b&gt; - CDC -&amp;gt; SCD · Streaming/Batch (Kappa) · Feature Store · RAG в одной архитектуре" vertex="1">
+          <mxGeometry height="40" width="1500" x="20" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="lane1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fcfcfc;strokeColor=#cccccc;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=14;fontStyle=1;fontColor=#333333;" value="① Справочник: CDC → SCD → Lakehouse" vertex="1">
+          <mxGeometry height="265" width="1990" x="10" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="lane2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f7f9fc;strokeColor=#cccccc;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=14;fontStyle=1;fontColor=#333333;" value="② Поток событий: Kappa, event-time, без потерь и дублей" vertex="1">
+          <mxGeometry height="334" width="1990" x="10" y="328" as="geometry" />
+        </mxCell>
+        <mxCell id="lane3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fffdf5;strokeColor=#cccccc;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=14;fontStyle=1;fontColor=#333333;" value="③ ML-признаки: Feature Store (offline + online)" vertex="1">
+          <mxGeometry height="262" width="1990" x="10" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="lane4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fbf7fc;strokeColor=#cccccc;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=14;fontStyle=1;fontColor=#333333;" value="④ Документы: RAG (ingestion -&amp;gt; chunking -&amp;gt;&amp;nbsp;embedding -&amp;gt;&amp;nbsp;поиск -&amp;gt;&amp;nbsp;генерация)" vertex="1">
+          <mxGeometry height="255" width="1990" x="10" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="lakehouse" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f8ef;strokeColor=#82b366;dashed=1;strokeWidth=2;verticalAlign=top;align=center;fontSize=12;fontStyle=1;arcSize=2;" value="Lakehouse: Apache Iceberg на S3" vertex="1">
+          <mxGeometry height="845" width="500" x="960" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="pg" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" value="&lt;b&gt;★ PostgreSQL OLTP&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;clients · scooters · tariffs&lt;br&gt;wal_level=logical&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="160" x="30" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="dbz" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;arcSize=8;" value="&lt;b&gt;★ Debezium (Kafka Connect)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;читает WAL через слот&lt;br&gt;snapshot -&amp;gt; stream&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="160" x="250" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;arcSize=4;" value="&lt;b&gt;★ Apache Kafka (KRaft)&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;топики:&lt;br&gt;oltp.public.clients&lt;br&gt;oltp.public.scooters&lt;br&gt;telemetry.raw&lt;br&gt;app.events&lt;br&gt;&lt;br&gt;ключ = id сущности&lt;br&gt;-&amp;gt; порядок внутри ключа&lt;br&gt;&lt;br&gt;retention 7 дней&lt;br&gt;-&amp;gt; replay / пересчёт&lt;br&gt;(основа Kappa)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="510" width="160" x="480" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="sss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" value="&lt;b&gt;☆ Spark Structured Streaming&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;микробатч, trigger 1 мин&lt;br&gt;foreachBatch -&amp;gt; 1 MERGE INTO&lt;br&gt;SCD2: city, tariff, status&lt;br&gt;SCD1: имя, телефон, email&lt;br&gt;повтор не применится (LSN)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="200" width="220" x="700" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="cdcraw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ bronze.cdc_raw&lt;/b&gt;&lt;br&gt;сырой CDC: аудит, пересборка" vertex="1">
+          <mxGeometry height="50" width="200" x="980" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="dimc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ silver.dim_client (SCD2)&lt;/b&gt;&lt;br&gt;valid_from / valid_to&lt;br&gt;is_current, src_lsn" vertex="1">
+          <mxGeometry height="70" width="200" x="980" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="dims" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ silver.dim_scooter (SCD1)&lt;/b&gt;&lt;br&gt;только текущее состояние" vertex="1">
+          <mxGeometry height="50" width="200" x="980" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="catalog" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ Каталог Iceberg&lt;/b&gt;&lt;br&gt;Lakekeeper REST (стенд: JDBC)" vertex="1">
+          <mxGeometry height="45" width="210" x="1220" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=6;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="&lt;b&gt;★ SeaweedFS (S3)&lt;/b&gt;&lt;br&gt;Parquet + metadata, снапшоты" vertex="1">
+          <mxGeometry height="50" width="210" x="1220" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="trino" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=8;" value="&lt;b&gt;★ Trino&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;SQL по всем таблицам Iceberg&lt;br&gt;запросы «на дату», time travel&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="200" x="1500" y="92.5" as="geometry" />
+        </mxCell>
+        <mxCell id="bi" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Бухгалтерия и аналитики&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;BI: «какой тариф был 1 марта»,&lt;br&gt;«статус до разблокировки»,&lt;br&gt;суточные отчеты (gold)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="230" x="1750" y="82.5" as="geometry" />
+        </mxCell>
+        <mxCell id="iot" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;arcSize=8;" value="&lt;b&gt;○ IoT-самокаты&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;GPS, заряд, скорость&lt;br&gt;без связи копят буфер -&amp;gt; опоздания&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="30" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="app" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Мобильное приложение&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;старт/финиш поездки, клики&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="30" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="mqtt" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;arcSize=8;" value="&lt;b&gt;○ MQTT-брокер + Kafka bridge&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;QoS 1 = at-least-once&lt;br&gt;-&amp;gt; возможны дубли&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="250" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="coll" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Collector API (HTTPS)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;event_id = UUID на устройстве&lt;br&gt;ретраи -&amp;gt; дубли&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="160" x="250" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="flink" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" value="&lt;b&gt;☆ Apache Flink&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;event-time + watermark 10 мин&lt;br&gt;dedup: state по event_id, TTL 48 ч&lt;br&gt;окна 1 мин&amp;nbsp; живые метрики&lt;br&gt;опоздавшие -&amp;gt; side output&lt;br&gt;exactly-once: checkpoints + 2PC&lt;/font&gt;" vertex="1">
+          <mxGeometry height="150" width="220" x="700" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="sb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ Spark batch (D+1, 03:00)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;суточный отчет из silver&lt;br&gt;batch-признаки&lt;br&gt;пересчет дня при опоздавших&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="220" x="700" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="evraw" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ bronze.events_raw&lt;/b&gt;&lt;br&gt;как пришло, с дублями" vertex="1">
+          <mxGeometry height="50" width="200" x="980" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="ev" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ silver.events&lt;/b&gt;&lt;br&gt;1 строка на event_id&lt;br&gt;partition day(event_time)" vertex="1">
+          <mxGeometry height="60" width="200" x="980" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="gold" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ gold.daily_rides&lt;/b&gt;&lt;br&gt;город/тариф на момент&lt;br&gt;поездки (из SCD2)" vertex="1">
+          <mxGeometry height="70" width="200" x="1225" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="live" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;★ Serving PostgreSQL&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;live_metrics: окна по event-time&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="200" x="1500" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="graf" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Grafana&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;живой мониторинг парка&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="230" x="1750" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="airflow" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0f0f0;strokeColor=#3a9a9a;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ Apache Airflow — оркестрация batch&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;отчет D+1 · batch-признаки · feast materialize · загрузка документов&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="390" x="250" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="feast" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ Feast (registry)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;feature views, preauth_v1&lt;br&gt;push API · materialize&lt;br&gt;одно описание для train и serve&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="220" x="700" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="off" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ features.* (offline store)&lt;/b&gt;&lt;br&gt;client_30d, rides_24h_log&lt;br&gt;история значений с timestamp" vertex="1">
+          <mxGeometry height="60" width="200" x="980" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="train" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;arcSize=8;" value="&lt;b&gt;★ features.training_preauth&lt;/b&gt;&lt;br&gt;point-in-time join&lt;br&gt;+ label (сумма поездки)" vertex="1">
+          <mxGeometry height="70" width="200" x="980" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="redis" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;★ Redis — online store&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;preauth:client:{id}&lt;br&gt;последние значения, TTL&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="200" x="1500" y="715" as="geometry" />
+        </mxCell>
+        <mxCell id="serve" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Model serving (FastAPI)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;get_online_features -&amp;gt; сумма&lt;br&gt;предавторизации при старте поездки&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="230" x="1750" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="mtrain" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Обучение (Jupyter + MLflow)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;get_historical_features&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="230" x="1750" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="docs" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;size=0.15;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" value="&lt;b&gt;★ Регламенты и инструкции&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;PDF · DOCX · MD&lt;br&gt;файловая шара/Confluence&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="160" x="30" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="load" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0f0f0;strokeColor=#3a9a9a;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ Загрузчик (DAG)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;sync -&amp;gt; S3 docs-raw&lt;br&gt;sha256: только новые&lt;br&gt;и измененные&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="160" x="250" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="parse" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ Парсинг и очистка&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;pypdf/python-docx;&lt;br&gt;метаданные: документ,&lt;br&gt;раздел, версия&lt;/font&gt;" vertex="1">
+          <mxGeometry height="90" width="180" x="460" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="chunk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ Chunking + Embedding&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;чанки по разделам, ~512 токенов,&lt;br&gt;overlap 15%&lt;br&gt;-&amp;gt; bge-m3 батчами&lt;br&gt;(стенд: hashing-заглушка)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="220" x="700" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="vdb" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=10;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="&lt;b&gt;★ PostgreSQL + pgvector (векторная БД)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;rag.documents: версии, sha256 · rag.chunks: текст + vector&lt;br&gt;HNSW (m=16, ef_construction=64) - приближtнный kNN&lt;br&gt;GIN tsvector(&#39;russian&#39;) - точные термины, номера&lt;/font&gt;" vertex="1">
+          <mxGeometry height="120" width="450" x="980" y="975" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=8;" value="&lt;b&gt;☆ RAG API (retriever)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;гибрид: kNN + полнотекст&lt;br&gt;-&amp;gt; RRF -&amp;gt; top-k&lt;br&gt;промпт с цитатами&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="200" x="1500" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="llm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;arcSize=8;" value="&lt;b&gt;○ Чат-бот для сотрудников&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;LLM отвечает только по контексту,&lt;br&gt;со ссылками на регламент&lt;br&gt;(сама модель - вне зоны DE)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="110" width="230" x="1760" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="evalq" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;arcSize=8;" value="&lt;b&gt;★ Оценка поиска&lt;/b&gt;&lt;br&gt;golden set: вопрос -&amp;gt; документ&lt;br&gt;Hit@k · MRR" vertex="1">
+          <mxGeometry height="50" width="200" x="1500" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="pg" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="dbz" value="WAL">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="dbz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;entryX=0;entryY=0.118;entryDx=0;entryDy=0;" target="kafka" value="CDC-&lt;br&gt;события">
+          <mxGeometry relative="1" x="-0.1453" y="20" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="kafka" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.118;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" target="sss" value="oltp.public.*">
+          <mxGeometry relative="1" x="0.0033" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="sss" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.175;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="cdcraw" value="append">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="sss" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.55;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="dimc" value="MERGE SCD2">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="sss" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.925;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="dims" value="MERGE SCD1">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="catalog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="s3" value="manifests -&amp;gt; Parquet">
+          <mxGeometry relative="1" x="-0.1111" y="55" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="catalog" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="trino" value="Iceberg">
+          <mxGeometry relative="1" x="-0.1429" y="13" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="trino" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="bi" value="SQL">
+          <mxGeometry relative="1" x="-0.2" y="8" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="iot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="mqtt" value="MQTT">
+          <mxGeometry relative="1" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="app" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="coll" value="HTTPS">
+          <mxGeometry relative="1" x="-0.3333" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="mqtt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;entryX=0;entryY=0.588;entryDx=0;entryDy=0;" target="kafka" value="telemetry.raw">
+          <mxGeometry relative="1" x="0.0016" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="coll" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;entryX=0;entryY=0.902;entryDx=0;entryDy=0;" target="kafka" value="app.events">
+          <mxGeometry relative="1" x="-0.1429" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="kafka" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.637;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="flink" value="события">
+          <mxGeometry relative="1" x="-0.0022" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="flink" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.167;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="evraw" value="append все">
+          <mxGeometry relative="1" x="0.0017" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="flink" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="live" value="окна 1 мин (без опоздавших)">
+          <mxGeometry relative="1" x="0.4138" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="flink" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.733;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ev" value="MERGE по event_id">
+          <mxGeometry relative="1" x="-0.0003" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="ev" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="sb" value="день D + опоздавшие">
+          <mxGeometry relative="1" x="-0.375" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1080" y="520" />
+              <mxPoint x="810" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="sb" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;exitX=1;exitY=0.55;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="gold" value="overwrite партиции дня">
+          <mxGeometry relative="1" x="0.082" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="dimc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="gold" value="join «на дату»">
+          <mxGeometry relative="1" x="-0.2317" y="40" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1200" y="210" />
+              <mxPoint x="1200" y="577" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="live" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="graf" value="SQL">
+          <mxGeometry relative="1" x="-0.2" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#3a9a9a;dashed=1;dashPattern=6 4;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.8;entryDx=0;entryDy=0;" target="sb" value="по расписанию">
+          <mxGeometry relative="1" x="0.0062" y="40" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="680" y="721" />
+              <mxPoint x="680" y="620" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#3a9a9a;dashed=1;dashPattern=6 4;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.49;entryDx=0;entryDy=0;" target="feast" value="materialize">
+          <mxGeometry relative="1" y="9" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="flink" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.95;exitDx=0;exitDy=0;entryX=0.8;entryY=0;entryDx=0;entryDy=0;" target="feast" value="push: rides_24h">
+          <mxGeometry relative="1" x="0.7143" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="950" y="492.5" />
+              <mxPoint x="950" y="680" />
+              <mxPoint x="876" y="680" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="sb" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="off" value="batch-признаки">
+          <mxGeometry relative="1" x="0.6444" y="40" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1080" y="625" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e26" edge="1" parent="1" source="feast" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.3;exitDx=0;exitDy=0;entryX=0;entryY=0.667;entryDx=0;entryDy=0;" target="off" value="лог&lt;br&gt;rides_24h">
+          <mxGeometry relative="1" x="-0.0002" y="20" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="feast" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0;entryY=0.867;entryDx=0;entryDy=0;" target="redis" value="materialize / push (online)">
+          <mxGeometry relative="1" x="0.2414" y="10" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28" edge="1" parent="1" source="off" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="train" value="PIT-join">
+          <mxGeometry relative="1" x="-0.2" y="30" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e29" edge="1" parent="1" source="dimc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;exitX=1;exitY=0.85;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="train" value="тариф на момент&lt;br&gt;события (SCD2)">
+          <mxGeometry relative="1" x="0.7501" y="-15" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1440" y="234" />
+              <mxPoint x="1440" y="835" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e30" edge="1" parent="1" source="redis" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.69;entryDx=0;entryDy=0;" target="serve" value="&amp;lt; 10 мс">
+          <mxGeometry relative="1" x="-0.241" y="13" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e31" edge="1" parent="1" source="train" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="mtrain" value="обучающая выборка">
+          <mxGeometry relative="1" x="-0.0061" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="1080" y="920" />
+              <mxPoint x="1865" y="920" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e32" edge="1" parent="1" source="mtrain" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="serve" value="модель (MLflow)">
+          <mxGeometry relative="1" y="-45" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e33" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#3a9a9a;dashed=1;dashPattern=6 4;exitX=0.1;exitY=1;exitDx=0;exitDy=0;entryX=0.244;entryY=0;entryDx=0;entryDy=0;" target="load" value="ежечасно">
+          <mxGeometry relative="1" x="-0.0909" y="31" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e34" edge="1" parent="1" source="docs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="load" value="файлы">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e35" edge="1" parent="1" source="load" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="parse" value="новые /&lt;br&gt;измененные">
+          <mxGeometry relative="1" x="-0.2" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e36" edge="1" parent="1" source="parse" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="chunk" value="текст +&lt;br&gt;метаданные">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e37" edge="1" parent="1" source="chunk" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="vdb" value="векторы&lt;br&gt;+ текст">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e38" edge="1" parent="1" source="vdb" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="api" value="kNN + FTS">
+          <mxGeometry relative="1" x="-0.1429" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e39" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;" target="llm" value="top-k&lt;br&gt;+ промпт">
+          <mxGeometry relative="1" y="15" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e40" edge="1" parent="1" source="evalq" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;labelBackgroundColor=#ffffff;jumpStyle=arc;jumpSize=8;strokeWidth=1.5;endArrow=block;endFill=1;strokeColor=#444444;dashed=1;dashPattern=6 4;" target="api" value="регресс-тест">
+          <mxGeometry relative="1" y="-30" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#cccccc;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontSize=14;fontStyle=1;fontColor=#333333;" value="Легенда" vertex="1">
+          <mxGeometry height="150" width="1990" x="10" y="1205" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" value="Источник" vertex="1">
+          <mxGeometry height="36" width="190" x="30" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" value="Захват/транспорт" vertex="1">
+          <mxGeometry height="36" width="190" x="240" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="Обработка" vertex="1">
+          <mxGeometry height="36" width="190" x="450" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Lakehouse: Iceberg/S3" vertex="1">
+          <mxGeometry height="36" width="190" x="660" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" value="Serving-хранилища, SQL" vertex="1">
+          <mxGeometry height="36" width="190" x="870" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="ML / Feature Store" vertex="1">
+          <mxGeometry height="36" width="190" x="1080" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d0f0f0;strokeColor=#3a9a9a;fontSize=11;" value="Оркестрация/загрузка" vertex="1">
+          <mxGeometry height="36" width="190" x="1290" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lg8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Потребители" vertex="1">
+          <mxGeometry height="36" width="190" x="1500" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="lgcyl" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;size=6;fillColor=#ffffff;strokeColor=#666666;fontSize=11;" value="цилиндр = хранилище" vertex="1">
+          <mxGeometry height="44" width="160" x="1710" y="1235" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="lgE1" value="" style="endArrow=block;endFill=1;html=1;strokeWidth=1.5;strokeColor=#444444;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="30" y="1300" as="sourcePoint"/><mxPoint x="80" y="1300" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="lgT1" value="поток (streaming, непрерывно)" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;" vertex="1" parent="1"><mxGeometry x="88" y="1290" width="190" height="20" as="geometry"/></mxCell>
+        <mxCell id="lgE2" value="" style="endArrow=block;endFill=1;html=1;strokeWidth=1.5;strokeColor=#444444;dashed=1;dashPattern=6 4;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="290" y="1300" as="sourcePoint"/><mxPoint x="340" y="1300" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="lgT2" value="batch / по расписанию" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;" vertex="1" parent="1"><mxGeometry x="348" y="1290" width="150" height="20" as="geometry"/></mxCell>
+        <mxCell id="lgE3" value="" style="endArrow=block;endFill=1;html=1;strokeWidth=1.5;strokeColor=#3a9a9a;dashed=1;dashPattern=6 4;" edge="1" parent="1"><mxGeometry relative="1" as="geometry"><mxPoint x="510" y="1300" as="sourcePoint"/><mxPoint x="560" y="1300" as="targetPoint"/></mxGeometry></mxCell>
+        <mxCell id="lgT3" value="запуск из Airflow" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;" vertex="1" parent="1"><mxGeometry x="568" y="1290" width="130" height="20" as="geometry"/></mxCell>
+        <mxCell id="lgT4" value="Подпись на стрелке = что передаётся (топик, операция, формат, частота)" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#000000;" vertex="1" parent="1"><mxGeometry x="30" y="1318" width="700" height="20" as="geometry"/></mxCell>
+        <mxCell id="lgtxt2" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=top;fontSize=12;fontColor=#000000;" value="&lt;b&gt;★&lt;/b&gt; поднято в docker-compose&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;b&gt;☆&lt;/b&gt; на стенде заменено python-скриптом / SQL (логика та же)&amp;nbsp;&amp;nbsp;&amp;nbsp;&lt;b&gt;○&lt;/b&gt; только в целевой архитектуре&lt;br&gt;Связи между темами: SCD2 → суточный отчёт и PIT-признаки; поток событий → отчёт, batch- и streaming-признаки; одно S3 для Lakehouse и документов (docs-raw)" vertex="1">
+          <mxGeometry height="60" width="1190" x="800" y="1290" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,15 @@
+# Целевая конфигурация Feast (на стенде не поднимался — см. отчёт, раздел 4)
+project: vzhuh
+provider: local
+registry:
+  registry_type: sql
+  path: postgresql://meta:meta@pg-meta:5432/meta     # реестр фич рядом с каталогом Iceberg
+offline_store:
+  type: trino                                         # Iceberg-таблицы features.* через Trino
+  host: trino
+  port: 8080
+  catalog: lakehouse
+online_store:
+  type: redis
+  connection_string: redis:6379
+entity_key_serialization_version: 2
